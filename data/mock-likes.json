@@ -1,0 +1,67 @@
+{
+  "authors": [
+    {
+      "id": "123",
+      "name": "Ada Lovelace",
+      "username": "ada",
+      "profileImageUrl": "https://pbs.twimg.com/profile_images/ada.jpg",
+      "verified": true
+    },
+    {
+      "id": "456",
+      "name": "Alan Turing",
+      "username": "aturing",
+      "profileImageUrl": "https://pbs.twimg.com/profile_images/turing.jpg",
+      "verified": false
+    }
+  ],
+  "tweets": [
+    {
+      "id": "1",
+      "text": "Exploring the future of computing with amazing visuals #AI #ML",
+      "createdAt": "2024-05-12T10:00:00Z",
+      "likeCount": 120,
+      "retweetCount": 20,
+      "replyCount": 5,
+      "quoteCount": 2,
+      "authorId": "123",
+      "permalink": "https://twitter.com/ada/status/1",
+      "hashtags": ["ai", "ml"],
+      "mentions": ["aturing"],
+      "media": [
+        {
+          "id": "media1",
+          "type": "photo",
+          "url": "https://pbs.twimg.com/media/sample1.jpg",
+          "previewUrl": "https://pbs.twimg.com/media/sample1.jpg",
+          "width": 1920,
+          "height": 1080
+        }
+      ]
+    },
+    {
+      "id": "2",
+      "text": "Throwback to the first programmable machine!",
+      "createdAt": "2024-04-02T15:30:00Z",
+      "likeCount": 240,
+      "retweetCount": 80,
+      "replyCount": 12,
+      "quoteCount": 4,
+      "authorId": "456",
+      "permalink": "https://twitter.com/aturing/status/2",
+      "hashtags": ["history"],
+      "mentions": [],
+      "media": [
+        {
+          "id": "media2",
+          "type": "video",
+          "url": "https://video.twimg.com/ext_tw_video/sample2.mp4",
+          "previewUrl": "https://pbs.twimg.com/media/sample2.jpg",
+          "width": 1280,
+          "height": 720,
+          "durationMs": 30000
+        }
+      ]
+    }
+  ]
+}

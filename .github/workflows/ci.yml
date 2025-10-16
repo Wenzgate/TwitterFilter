@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: twitterfilter
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/twitterfilter
+      NEXTAUTH_SECRET: test-secret
+      TOKEN_ENCRYPTION_KEY: test-secret-test-secret-test-se
+      NEXTAUTH_URL: http://localhost:3000
+      APP_URL: http://localhost:3000
+      NODE_ENV: test
+      DISABLE_AUTH_GUARD: "true"
+      DEV_USER_ID: dev-user
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile=false
+      - run: pnpm db:generate
+      - run: pnpm db:migrate
+      - run: pnpm seed
+      - run: pnpm lint
+      - run: pnpm test
+      - run: pnpm build

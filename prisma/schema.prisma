@@ -1,0 +1,108 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  username      String?   @unique
+  accounts      Account[]
+  sessions      Session[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String? @db.Text
+  access_token       String? @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String? @db.Text
+  session_state      String?
+  user               User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Author {
+  id              String   @id
+  name            String
+  username        String   @unique
+  profileImageUrl String?  @db.Text
+  verified        Boolean  @default(false)
+  tweets          Tweet[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Tweet {
+  id           String   @id
+  text         String   @db.Text
+  createdAt    DateTime
+  likeCount    Int
+  retweetCount Int
+  replyCount   Int
+  quoteCount   Int
+  authorId     String
+  permalink    String
+  hashtags     String[]
+  mentions     String[]
+  author       Author   @relation(fields: [authorId], references: [id])
+  media        Media[]
+
+  @@index([createdAt], map: "tweet_created_at_idx")
+  @@index([likeCount], map: "tweet_like_idx")
+  @@index([retweetCount], map: "tweet_retweet_idx")
+  @@index([authorId], map: "tweet_author_idx")
+}
+
+model Media {
+  id         String @id
+  type       String
+  url        String?
+  previewUrl String?
+  width      Int?
+  height     Int?
+  durationMs Int?
+  tweetId    String
+  tweet      Tweet  @relation(fields: [tweetId], references: [id], onDelete: Cascade)
+
+  @@index([type])
+}
+
+model SyncState {
+  userId    String   @id
+  nextToken String?
+  sinceId   String?
+  syncedAt  DateTime
+}

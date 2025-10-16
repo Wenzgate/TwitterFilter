@@ -1,0 +1,245 @@
+openapi: 3.1.0
+info:
+  title: X Media Likes API
+  version: 1.0.0
+  description: API interne pour l'application X Media Likes Dashboard.
+servers:
+  - url: https://localhost:3000
+paths:
+  /api/sync:
+    post:
+      summary: Lance une synchronisation des likes avec médias
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: userId
+          schema:
+            type: string
+          description: Identifiant de l'utilisateur à synchroniser (obligatoire pour les appels cron).
+      responses:
+        '200':
+          description: Synchronisation terminée
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  imported:
+                    type: number
+        '401':
+          description: Non authentifié
+        '429':
+          description: Synchronisation déjà en cours
+  /api/likes:
+    get:
+      summary: Liste paginée des tweets likés avec médias
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: sort
+          schema:
+            type: string
+            enum: [likes_desc, likes_asc, date_desc, date_asc, retweets_desc, retweets_asc]
+        - in: query
+          name: type
+          schema:
+            type: string
+            enum: [image, video, gif, any]
+        - in: query
+          name: q
+          schema:
+            type: string
+        - in: query
+          name: author
+          schema:
+            type: string
+        - in: query
+          name: from
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: to
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: page
+          schema:
+            type: integer
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Résultats paginés
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                  page:
+                    type: integer
+                  pageSize:
+                    type: integer
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Tweet'
+        '401':
+          description: Non authentifié
+  /api/likes/{id}:
+    get:
+      summary: Détail d'un tweet liké
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Tweet détaillé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tweet'
+        '404':
+          description: Non trouvé
+  /api/stats:
+    get:
+      summary: Statistiques agrégées
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Statistiques calculées
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  topAuthors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        author:
+                          $ref: '#/components/schemas/Author'
+                        likes:
+                          type: integer
+                        tweets:
+                          type: integer
+                  mediaDistribution:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                        count:
+                          type: integer
+                  timeline:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        date:
+                          type: string
+                          format: date
+                        likes:
+                          type: integer
+                  topHashtags:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        tag:
+                          type: string
+                        count:
+                          type: integer
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    Media:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        url:
+          type: string
+          nullable: true
+        previewUrl:
+          type: string
+          nullable: true
+        width:
+          type: integer
+          nullable: true
+        height:
+          type: integer
+          nullable: true
+        durationMs:
+          type: integer
+          nullable: true
+    Author:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        username:
+          type: string
+        profileImageUrl:
+          type: string
+          nullable: true
+        verified:
+          type: boolean
+    Tweet:
+      type: object
+      properties:
+        id:
+          type: string
+        text:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        likeCount:
+          type: integer
+        retweetCount:
+          type: integer
+        replyCount:
+          type: integer
+        quoteCount:
+          type: integer
+        authorId:
+          type: string
+        permalink:
+          type: string
+        hashtags:
+          type: array
+          items:
+            type: string
+        mentions:
+          type: array
+          items:
+            type: string
+        media:
+          type: array
+          items:
+            $ref: '#/components/schemas/Media'
